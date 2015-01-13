@@ -115,10 +115,9 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode(im.size)
 
-    title = pygame.font.Font('BebasNeue.ttf',72)
+    title = pygame.font.Font('BebasNeue.ttf',int(max(im.size)**0.7))
     message = title.render("Loading...",1,(200,200,0))
-#    screen.blit(message,((im.size[0]-message.get_rect().width)/2,(im.size[1]-message.get_rect().height)/2))
-    screen.blit(message,(50,50))
+    screen.blit(message,(im.size[0]/10,im.size[1]/10))
     pygame.display.flip()
     
 
@@ -191,7 +190,8 @@ def main():
         else:
             continue
 
-
+    display.save(argv[3].lower()+"_"+str(depth)+"_"+argv[2],im.format)
+    print "saved"
     sleep(50)
         
 if __name__=="__main__":
