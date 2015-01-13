@@ -1,6 +1,0 @@
-there are currently lines drawn on the image as an artifact of the triangle-splitting.
-should get rid of those lines. they're kind of ugly
-
-current rendering process is DFS. should also give a BFS option.
-
-random triangles instead of the right-angle split ones would be cool, too.

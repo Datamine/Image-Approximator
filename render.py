@@ -7,6 +7,52 @@ from PIL import Image, ImageDraw
 from time import sleep
 import pygame
 from sys import argv, exit
+class Triangle(object):
+    """
+    To collect the coords marking each triangle, and for related computations.
+    """
+    def __init__(self,p1,p2,p3):
+        """
+        Where p1, p2, p3 are all tuples of (x,y) coords
+        """
+        self.p1 = p1
+        self.p2 = p2
+        self.p3 = p3
+    def split(self):
+        # defining the hypotenuse as the two points that form the line
+        coordinatepairs = [(self.p1,self.p2),(self.p1,self.p3),(self.p2,self.p3)]
+        hypotenuse = max(coordinatepairs, key=l2norm)
+        halfway = (int((hypotenuse[0][0]+hypotenuse[1][0])/2.0), 
+                   int((hypotenuse[0][1]+hypotenuse[1][1])/2.0))
+        opposite = [x for x in [self.p1,self.p2,self.p3] if x not in hypotenuse][0]
+        return Triangle(hypotenuse[0],halfway,opposite), Triangle(hypotenuse[1],halfway,opposite)
+    def area(self):
+        # using Heron's formula
+        a = l2norm((self.p1,self.p2))
+        b = l2norm((self.p2,self.p3))
+        c = l2norm((self.p1,self.p3))
+        s = (a+b+c)/2.0
+        return (s*(s-a)*(s-b)*(s-c))**0.5
+    def getpoints(self):
+        # return all coordinates inside the triangle
+        # using barymetric method for testing point-in-triangle 
+        # made reference to http://jsfiddle.net/PerroAZUL/zdaY8/1
+        coords = []
+        area = self.area()
+        sign = -1 if area <0 else 1
+        minx = min(self.p1[0],self.p2[0],self.p3[0])
+        miny = min(self.p1[1],self.p2[1],self.p3[1])
+        maxx = max(self.p1[0],self.p2[0],self.p3[0])
+        maxy = max(self.p1[1],self.p2[1],self.p3[1])
+        for x in range(minx,maxx):
+            for y in range(miny,maxy):
+                s = (self.p1[1] * self.p3[0] - self.p1[0] * self.p3[1] + (self.p3[1] - self.p1[1]) * x + (self.p1[0] - self.p3[0]) * y) * sign
+                # next few lines: replace GT/LT with strict inequalities (<,>) if you want lines separating triangles to appear in the image.
+                if s >= 0:
+                    t = (self.p1[0] * self.p2[1] - self.p1[1] * self.p2[0] + (self.p1[1] - self.p2[1]) * x + (self.p2[0] - self.p1[0]) * y) * sign
+                    if t >= 0 and (s+t) <= 2 * area * sign:
+                       coords.append((x,y))
+        return coords
 
 def l2norm(pair):
     """
@@ -59,56 +105,9 @@ def getaverage(list):
 
 def chunks(l, n):
     """ 
-    http://stackoverflow.com/a/1751478
+    From http://stackoverflow.com/a/1751478. Makes a list into a nested one.
     """
     return [l[i:i + n] for i in range(0, len(l), n)]
-
-class Triangle(object):
-    """
-    To collect the coords marking each triangle, and for related computations.
-    """
-    def __init__(self,p1,p2,p3):
-        """
-        Where p1, p2, p3 are all tuples of (x,y) coords
-        """
-        self.p1 = p1
-        self.p2 = p2
-        self.p3 = p3
-    def split(self):
-        # defining the hypotenuse as the two points that form the line
-        coordinatepairs = [(self.p1,self.p2),(self.p1,self.p3),(self.p2,self.p3)]
-        hypotenuse = max(coordinatepairs, key=l2norm)
-        halfway = (int((hypotenuse[0][0]+hypotenuse[1][0])/2.0), 
-                   int((hypotenuse[0][1]+hypotenuse[1][1])/2.0))
-        opposite = [x for x in [self.p1,self.p2,self.p3] if x not in hypotenuse][0]
-        return Triangle(hypotenuse[0],halfway,opposite), Triangle(hypotenuse[1],halfway,opposite)
-    def area(self):
-        # using Heron's formula
-        a = l2norm((self.p1,self.p2))
-        b = l2norm((self.p2,self.p3))
-        c = l2norm((self.p1,self.p3))
-        s = (a+b+c)/2.0
-        return (s*(s-a)*(s-b)*(s-c))**0.5
-    def getpoints(self):
-        # return all coordinates inside the triangle
-        # using barymetric method for testing point-in-triangle 
-        # made reference to http://jsfiddle.net/PerroAZUL/zdaY8/1
-        coords = []
-        area = self.area()
-        sign = -1 if area <0 else 1
-        minx = min(self.p1[0],self.p2[0],self.p3[0])
-        miny = min(self.p1[1],self.p2[1],self.p3[1])
-        maxx = max(self.p1[0],self.p2[0],self.p3[0])
-        maxy = max(self.p1[1],self.p2[1],self.p3[1])
-        for x in range(minx,maxx):
-            for y in range(miny,maxy):
-                s = (self.p1[1] * self.p3[0] - self.p1[0] * self.p3[1] + (self.p3[1] - self.p1[1]) * x + (self.p1[0] - self.p3[0]) * y) * sign
-                # next few lines: replace GT/LT with strict inequalities (<,>) if you want lines separating triangles to appear in the image.
-                if s >= 0:
-                    t = (self.p1[0] * self.p2[1] - self.p1[1] * self.p2[0] + (self.p1[1] - self.p2[1]) * x + (self.p2[0] - self.p1[0]) * y) * sign
-                    if t >= 0 and (s+t) <= 2 * area * sign:
-                       coords.append((x,y))
-        return coords
 
 def main():
     depth, im, method = getinput()
@@ -125,7 +124,7 @@ def main():
     imagecolors = [sRGBColor(a/255.0,b/255.0,c/255.0) for (a,b,c) in imagedata]
     imagelab = [convert_color(x,LabColor) for x in imagecolors]
 
-## making the average-colored rectangle
+    ## making the average-colored rectangle
 
     avimlab = convert_color(getaverage(imagelab),sRGBColor)
     avgimagergb = tuple(map(lambda x: int(round(x)), 
@@ -137,7 +136,7 @@ def main():
     screen.blit(toshow,(0,0))
     pygame.display.flip()
 
-## splitting the rectangle into two triangles    
+    ## splitting the rectangle into two triangles    
 
     imagelab = chunks(imagelab,im.size[0])
     
@@ -145,8 +144,9 @@ def main():
     T2 = Triangle((0,0),(0,im.size[1]),(im.size[0],im.size[1]))
     t1coords = T1.getpoints()
     t2coords = T1.getpoints()    
-    cond = True
-        
+    
+    ## Now the iteration part
+    
     listcoords = [t1coords,t2coords]
     Triangles = [T1,T2]
     
@@ -154,6 +154,7 @@ def main():
         current_coords = listcoords.pop()
         current_triangle = Triangles.pop()
 
+        # Get the average color of the points in the triangle.
         suml,suma,sumb = 0.0,0.0,0.0
         update = []
         count = 0
@@ -169,6 +170,9 @@ def main():
         if count > 0:            
             newavg = convert_color(LabColor(lab_l = suml/count,lab_a = suma/count, lab_b = sumb/count),sRGBColor)
             newavgimagergb = tuple(map(lambda x: int(round(x)), (newavg.rgb_r*255,newavg.rgb_g*255,newavg.rgb_b*255)))
+            
+            # Updating the image.
+
             for i in update:
                 display.putpixel((i[0],i[1]),newavgimagergb)
                 
@@ -177,6 +181,8 @@ def main():
             screen.blit(toshow,(0,0))
             pygame.display.flip()
             
+        # Splitting the triangle into new triangles, checking against depth.
+
         new1,new2 = current_triangle.split()
         if new1.area() > depth:
             add1 = new1.getpoints()
@@ -190,9 +196,16 @@ def main():
         else:
             continue
 
-    display.save(argv[3].lower()+"_"+str(depth)+"_"+argv[2],im.format)
-    print "saved"
-    sleep(50)
+    # Get rid of slashes in filename in case of using images from a folder
+    try:
+        filename = argv[2][::-1]
+        fi = filename[:filename.index("/")][::-1]
+    except:
+        fi = argv[2]
+    # Save the final image!
+    display.save(argv[3].lower()+"_"+str(depth)+"_"+fi,im.format)
+    print "Finished! Image has been saved."
+    sleep(10)
         
 if __name__=="__main__":
     main()
