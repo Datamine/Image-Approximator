@@ -20,7 +20,7 @@ The following are areas for improvement:
 
 * Could do this with random polygons at random positions. Maybe doing nothing but color inversions to approximate the image.
 
-* This needs to be speeded up! Some optimization is called for.
+* This needs to be sped up! Some optimization is called for.
 
 * Should make a shortcut-mode that bypasses the animation and instead just renders the final image, directly.
 
