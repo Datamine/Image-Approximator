@@ -10,7 +10,7 @@ Requires:
 
 The following are areas for improvement:
 
-* ~~There are currently lines drawn on the image as an artifact of the triangle-splitting. Should get rid of those lines -- they're ugly/distracting. ~~
+* ~~There are currently lines drawn on the image as an artifact of the triangle-splitting. Should get rid of those lines -- they're ugly/distracting.~~
 (Done, with an option to have them in the image for a more `tiled' look.)
 
 * ~~Current rendering process is DFS. Should also have a BFS option.~~
