@@ -35,7 +35,15 @@ def getinput():
         exit(0)
     global xlen
     xlen = im.size[0]
-    return depth, im
+    render = argv[3].lower()
+    if render=='b':
+        method=True 
+    elif render=='d':
+        method=False
+    else:
+        print "Error! Specify 'd' or 'b' for the search method. Exiting"
+        exit(0)
+    return depth, im,method
 
 def getaverage(list):
     """
@@ -103,7 +111,7 @@ class Triangle(object):
         return coords
 
 def main():
-    depth, im = getinput()
+    depth, im, method = getinput()
     pygame.init()
     screen = pygame.display.set_mode(im.size)
 
@@ -174,8 +182,12 @@ def main():
         if new1.area() > depth:
             add1 = new1.getpoints()
             add2 = new2.getpoints()
-            listcoords += [add1,add2]
-            Triangles += [new1,new2]
+            if method:
+                listcoords += [add1,add2]
+                Triangles += [new1,new2]
+            else:
+                listcoords = [add1,add2] + listcoords
+                Triangles = [new1,new2] + Triangles
         else:
             continue
 
