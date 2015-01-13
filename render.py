@@ -92,13 +92,13 @@ class Triangle(object):
         miny = min(self.p1[1],self.p2[1],self.p3[1])
         maxx = max(self.p1[0],self.p2[0],self.p3[0])
         maxy = max(self.p1[1],self.p2[1],self.p3[1])
-#        print minx,miny,maxx,maxy
         for x in range(minx,maxx):
             for y in range(miny,maxy):
                 s = (self.p1[1] * self.p3[0] - self.p1[0] * self.p3[1] + (self.p3[1] - self.p1[1]) * x + (self.p1[0] - self.p3[0]) * y) * sign
-                if s > 0:
+                # next few lines: replace GT/LT with strict inequalities (<,>) if you want lines separating triangles to appear in the image.
+                if s >= 0:
                     t = (self.p1[0] * self.p2[1] - self.p1[1] * self.p2[0] + (self.p1[1] - self.p2[1]) * x + (self.p2[0] - self.p1[0]) * y) * sign
-                    if t > 0 and (s+t) < 2 * area * sign:
+                    if t >= 0 and (s+t) <= 2 * area * sign:
                        coords.append((x,y))
         return coords
 
@@ -174,7 +174,6 @@ def main():
         if new1.area() > depth:
             add1 = new1.getpoints()
             add2 = new2.getpoints()
-#            add2 = list(set(current_coords) - set(add1))
             listcoords += [add1,add2]
             Triangles += [new1,new2]
         else:
